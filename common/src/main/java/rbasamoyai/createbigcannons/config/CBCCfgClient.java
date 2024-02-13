@@ -7,6 +7,7 @@ public class CBCCfgClient extends CBCConfigBase {
 	public final ConfigGroup client = group(0, "client", Comments.client);
 	
 	public final ConfigEnum<PlumeSetting> showCannonPlumes = e(PlumeSetting.DEFAULT, "showCannonPlumes", Comments.showCannonPlumes);
+	public final ConfigFloat plumesScale = f(1, 0, 1, "plumesScale", Comments.plumesScale);
 	public final ConfigInt fluidBlobParticleCount = i(20, 0, 1000, "fluidBlobParticleCount", Comments.fluidBlobParticleCount);
 	
 	@Override public String getName() { return "client"; }
@@ -18,6 +19,7 @@ public class CBCCfgClient extends CBCConfigBase {
 				"Legacy - Cannons spawn vanilla particles (mostly campfire smoke) when firing. The classic look, but spawns many particles and may cause high lag.",
 				"Default - Cannons spawn cannon smoke particles, designed to give a grand impression while keeping the spawned particle count low compared to Legacy."
 		};
+		static String plumesScale = "Plume particles size multiplier.";
 		static String fluidBlobParticleCount = "How many particles are in a Fluid Blob of any size.";
 	}
 	

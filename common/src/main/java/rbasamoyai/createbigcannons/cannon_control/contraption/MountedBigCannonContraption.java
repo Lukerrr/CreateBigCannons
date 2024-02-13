@@ -53,6 +53,7 @@ public class MountedBigCannonContraption extends AbstractMountedCannonContraptio
 
 	private BigCannonMaterial cannonMaterial;
 	public boolean hasFired = false;
+	private int reloadTicksRemain = 0;
 
 	@Override
 	public float maximumDepression(@Nonnull ControlPitchContraption controller) {
@@ -216,6 +217,10 @@ public class MountedBigCannonContraption extends AbstractMountedCannonContraptio
 	public void tick(Level level, PitchOrientedContraptionEntity entity) {
 		super.tick(level, entity);
 
+		if (this.reloadTicksRemain > 0) {
+			this.reloadTicksRemain -= 1;
+		}
+
 		BlockPos endPos = this.startPos.relative(this.initialOrientation.getOpposite());
 		if (this.presentBlockEntities.get(endPos) instanceof QuickfiringBreechBlockEntity qfbreech)
 			qfbreech.tickAnimation();
@@ -229,6 +234,10 @@ public class MountedBigCannonContraption extends AbstractMountedCannonContraptio
 
 	@Override
 	public void fireShot(ServerLevel level, PitchOrientedContraptionEntity entity, @Nullable ControlPitchContraption controller) {
+		if (this.reloadTicksRemain > 0) {
+			return;
+		}
+
 		BlockPos endPos = this.startPos.relative(this.initialOrientation.getOpposite());
 		if (this.presentBlockEntities.get(endPos) instanceof QuickfiringBreechBlockEntity qfbreech && qfbreech.getOpenProgress() > 0)
 			return;
@@ -377,6 +386,7 @@ public class MountedBigCannonContraption extends AbstractMountedCannonContraptio
 		if (controller != null) controller.onRecoil(vec.scale(-recoilMagnitude), entity);
 
 		this.hasFired = true;
+		this.reloadTicksRemain = CBCConfigs.SERVER.cannons.bigCannonReloadSeconds.get() * 20;
 
 		for (ServerPlayer player : level.players()) {
 			level.sendParticles(player, new CannonPlumeParticleData(smokeScale * 0.5f), true, spawnPos.x, spawnPos.y, spawnPos.z, 0, vec.x, vec.y, vec.z, 1.0f);
@@ -389,7 +399,8 @@ public class MountedBigCannonContraption extends AbstractMountedCannonContraptio
 	}
 
 	private void consumeBlock(BigCannonBehavior behavior, BlockPos pos, Consumer<BigCannonBehavior> action) {
-		action.accept(behavior);
+		// Do not consume
+		/*action.accept(behavior);
 		CompoundTag tag = behavior.blockEntity.saveWithFullMetadata();
 		tag.remove("x");
 		tag.remove("y");
@@ -398,7 +409,7 @@ public class MountedBigCannonContraption extends AbstractMountedCannonContraptio
 		StructureBlockInfo oldInfo = this.blocks.get(pos);
 		if (oldInfo == null) return;
 		StructureBlockInfo consumedInfo = new StructureBlockInfo(oldInfo.pos(), oldInfo.state(), tag);
-		this.blocks.put(oldInfo.pos(), consumedInfo);
+		this.blocks.put(oldInfo.pos(), consumedInfo);*/
 	}
 
 	private static boolean rollSquib(RandomSource random) {

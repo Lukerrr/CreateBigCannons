@@ -2,7 +2,7 @@
   "base_fuze": false,
   "drag": 0.99,
   "durability_mass": 6.0,
-  "entity_damage": 6.0,
+  "entity_damage": 8.0,
   "gravity": -0.025,
   "ignores_entity_armor": false,
   "renders_invulnerable": false

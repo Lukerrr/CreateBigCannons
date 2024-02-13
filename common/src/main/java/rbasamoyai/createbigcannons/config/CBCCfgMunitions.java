@@ -27,6 +27,7 @@ public class CBCCfgMunitions extends ConfigBase {
 	public final ConfigFloat fluidBlobSpread = f(1f, 0.01f, "fluidBlobSpread", Comments.fluidBlobSpread);
 	public final ConfigInt mbPerAoeRadius = i(50, 25, "millibucketsPerAreaOfEffectRadius", Comments.mbPerAoeRadius);
 	public final ConfigFloat fluidBlobBlockAffectChance = f(0.5f, 0, 1, "fluidBlobBlockEffectChance", Comments.fluidBlobBlockAffectChance);
+	public final ConfigBool highExplosiveUseFire = b(true, "highExplosiveUseFire", Comments.highExplosiveUseFire);
 
 
 	public final ConfigGroup propellant = group(0, "propellant", "Propellant");
@@ -35,7 +36,7 @@ public class CBCCfgMunitions extends ConfigBase {
 	public final ConfigFloat addedSpread = f(2.0f, 0.0f, "addedSpread", Comments.addedSpread);
 	public final ConfigFloat bigCartridgeStrength = f(1.0f, 0.5f, 4, "bigCartridgeStrength", Comments.bigCartridgeStrength);
 	public final ConfigFloat bigCartridgeStress = f(0.5f, 0, "bigCartridgeStress", Comments.bigCartridgeStress);
-	public final ConfigInt maxBigCartridgePower = i(4, 1, 8, "maxBigCartridgePower", Comments.maxBigCartridgePower);
+	public final ConfigInt maxBigCartridgePower = i(32, 1, "maxBigCartridgePower", Comments.maxBigCartridgePower);
 
 	public final ConfigGroup deflectChances = group(0, "deflectChances", "Deflection");
 	public final ConfigFloat bigCannonDeflectChance = f(0.9f, 0, 1, "bigCannonProjectileDeflectionChance", Comments.bigCannonDeflectChance);
@@ -80,6 +81,7 @@ public class CBCCfgMunitions extends ConfigBase {
 		static String fluidBlobSpread = "How much Fluid Blobs spread on release.";
 		static String mbPerAoeRadius = "How many millibuckets (mB) of fluid in a Fluid Blob are required to increase its area of effect (AOE) by one block in each direction.";
 		static String fluidBlobBlockAffectChance = "The chance of a fluid blob affecting a block in its area of effect (AOE). 0 is 0% (never), 1 is 100% (always).";
+		static String highExplosiveUseFire = "Whether or not spawn fire on high explosive shell explosion.";
 		static String flakCount = "Amount of shrapnel bullets that a Flak Autocannon Shell releases on detonation.";
 		static String flakSpread = "How much flak shrapnel bullets spread on release.";
 		static String flakDamage = "How much damage a flak shrapnel bullet does.";

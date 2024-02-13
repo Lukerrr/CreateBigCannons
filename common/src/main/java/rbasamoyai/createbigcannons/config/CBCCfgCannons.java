@@ -9,6 +9,7 @@ public class CBCCfgCannons extends ConfigBase {
 	public final ConfigInt quickfiringBreechLoadingCooldown = i(40, 0, "quickfiringBreechLoadingCooldown", Comments.quickfiringBreechLoadingCooldown);
 	public final ConfigInt quickfiringBreechOpeningCooldown = i(5, 0, "quickfiringBreechOpeningCooldown", Comments.quickfiringBreechOpeningCooldown);
 	public final ConfigFloat bigCannonRecoilScale = f(4f, 0, "bigCannonRecoilScale");
+	public final ConfigInt bigCannonReloadSeconds = i(1, 0, "bigCannonReloadSeconds");
 	public final ConfigFloat autocannonRecoilScale = f(0.5f, 0, "autocannonRecoilScale");
 
 	public final ConfigGroup loadingTools = group(0, "loadingTools", "Loading Tools");

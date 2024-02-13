@@ -44,6 +44,8 @@ public class CannonMountBlockEntity extends KineticBlockEntity implements IDispl
 
 	private float cannonYaw;
 	private float cannonPitch;
+	private float savedCannonYaw;
+	private float savedCannonPitch;
 	private float prevYaw;
 	private float prevPitch;
 	private float clientYawDiff;
@@ -251,7 +253,7 @@ public class CannonMountBlockEntity extends KineticBlockEntity implements IDispl
 		mountedCannon.removeBlocksFromWorld(this.getLevel(), BlockPos.ZERO);
 		PitchOrientedContraptionEntity contraptionEntity = PitchOrientedContraptionEntity.create(this.getLevel(), mountedCannon, facing1, this);
 		this.mountedContraption = contraptionEntity;
-		this.resetContraptionToOffset();
+		this.restoreContraptionRotation();
 		this.getLevel().addFreshEntity(contraptionEntity);
 
 		this.sendData();
@@ -269,6 +271,8 @@ public class CannonMountBlockEntity extends KineticBlockEntity implements IDispl
 	public void disassemble() {
 		if (!this.running && this.mountedContraption == null) return;
 		if (this.mountedContraption != null) {
+			this.savedCannonPitch = this.cannonPitch;
+			this.savedCannonYaw = this.cannonYaw;
 			this.resetContraptionToOffset();
 			this.mountedContraption.save(new CompoundTag()); // Crude refresh of block data
 			this.mountedContraption.disassemble();
@@ -280,6 +284,27 @@ public class CannonMountBlockEntity extends KineticBlockEntity implements IDispl
 		if (this.remove) {
 			CBCBlocks.CANNON_MOUNT.get().playerWillDestroy(this.getLevel(), this.worldPosition, this.getBlockState(), null);
 		}
+	}
+
+	protected void restoreContraptionRotation() {
+		if (this.mountedContraption == null) return;
+		this.cannonPitch = this.savedCannonPitch;
+		this.cannonYaw = this.savedCannonYaw;
+		this.prevPitch = this.cannonPitch;
+		this.prevYaw = this.cannonYaw;
+
+		this.mountedContraption.pitch = this.cannonPitch;
+		this.mountedContraption.yaw = this.cannonYaw;
+		this.mountedContraption.prevPitch = this.mountedContraption.pitch;
+		this.mountedContraption.prevYaw = this.mountedContraption.yaw;
+
+		this.mountedContraption.setXRot(this.cannonPitch);
+		this.mountedContraption.setYRot(this.cannonYaw);
+		this.mountedContraption.xRotO = this.mountedContraption.getXRot();
+		this.mountedContraption.yRotO = this.mountedContraption.getYRot();
+
+		Vec3 vec = Vec3.atBottomCenterOf((this.worldPosition.above(2)));
+		this.mountedContraption.setPos(vec);
 	}
 
 	protected void resetContraptionToOffset() {

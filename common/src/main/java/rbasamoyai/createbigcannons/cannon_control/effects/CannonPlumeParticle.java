@@ -21,7 +21,7 @@ public class CannonPlumeParticle extends NoRenderParticle {
 	CannonPlumeParticle(ClientLevel level, double x, double y, double z, Vec3 direction, float scale) {
 		super(level, x, y, z);
 		this.direction = direction;
-		this.scale = scale;
+		this.scale = scale * CBCConfigs.CLIENT.plumesScale.getF();
 		Minecraft mc = Minecraft.getInstance();
 		this.plumesSetting = mc.options.particles().get() == ParticleStatus.ALL ? CBCConfigs.CLIENT.showCannonPlumes.get() : PlumeSetting.OFF;
 
