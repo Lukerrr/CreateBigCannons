@@ -14,6 +14,7 @@ import rbasamoyai.createbigcannons.cannon_control.cannon_mount.YawControllerBloc
 import rbasamoyai.createbigcannons.cannon_control.cannon_mount.YawControllerInstance;
 import rbasamoyai.createbigcannons.cannon_control.carriage.CannonCarriageBlockEntity;
 import rbasamoyai.createbigcannons.cannonloading.CannonLoaderBlockEntity;
+import rbasamoyai.createbigcannons.cannonloading.cannonhopper.CannonHopperBlockEntity;
 import rbasamoyai.createbigcannons.cannons.autocannon.AutocannonBlockEntity;
 import rbasamoyai.createbigcannons.cannons.autocannon.breech.AbstractAutocannonBreechBlockEntity;
 import rbasamoyai.createbigcannons.cannons.autocannon.breech.AutocannonBreechInstance;
@@ -91,6 +92,13 @@ public class CBCBlockEntities {
 		.instance(() -> QuickfiringBreechInstance::new)
 		.renderer(() -> QuickfiringBreechBlockEntityRenderer::new)
 		.validBlocks(CBCBlocks.CAST_IRON_QUICKFIRING_BREECH, CBCBlocks.BRONZE_QUICKFIRING_BREECH, CBCBlocks.STEEL_QUICKFIRING_BREECH)
+		.register();
+
+	public static final BlockEntityEntry<CannonHopperBlockEntity> CANNON_HOPPER = REGISTRATE
+		.blockEntity("cannon_hopper", CannonHopperBlockEntity::new)
+		.instance(() -> ShaftInstance::new, false)
+		.renderer(() -> ShaftRenderer::new)
+		.validBlock(CBCBlocks.CANNON_HOPPER)
 		.register();
 
 	public static final BlockEntityEntry<CannonLoaderBlockEntity> CANNON_LOADER = REGISTRATE

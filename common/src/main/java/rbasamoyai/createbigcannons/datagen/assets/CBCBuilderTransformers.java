@@ -69,6 +69,7 @@ public class CBCBuilderTransformers {
 
 	@ExpectPlatform public static <T extends Block, P> NonNullUnaryOperator<BlockBuilder<T, P>> wormHead() { throw new AssertionError(); }
 
+	@ExpectPlatform public static <T extends Block, P> NonNullUnaryOperator<BlockBuilder<T, P>> cannonHopper() { throw new AssertionError(); }
 	@ExpectPlatform public static <T extends DirectionalAxisKineticBlock, P> NonNullUnaryOperator<BlockBuilder<T, P>> cannonLoader() { throw new AssertionError(); }
 
 	@ExpectPlatform public static <T extends DirectionalAxisKineticBlock, P> NonNullUnaryOperator<BlockBuilder<T, P>> cannonDrill() { throw new AssertionError(); }

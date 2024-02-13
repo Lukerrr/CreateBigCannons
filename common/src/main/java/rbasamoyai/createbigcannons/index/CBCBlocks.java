@@ -34,6 +34,7 @@ import rbasamoyai.createbigcannons.cannon_control.carriage.CannonCarriageBlock;
 import rbasamoyai.createbigcannons.cannonloading.CannonLoaderBlock;
 import rbasamoyai.createbigcannons.cannonloading.RamHeadBlock;
 import rbasamoyai.createbigcannons.cannonloading.WormHeadBlock;
+import rbasamoyai.createbigcannons.cannonloading.cannonhopper.CannonHopperBlock;
 import rbasamoyai.createbigcannons.cannons.autocannon.AutocannonBarrelBlock;
 import rbasamoyai.createbigcannons.cannons.autocannon.breech.AutocannonBreechBlock;
 import rbasamoyai.createbigcannons.cannons.autocannon.recoil_spring.AutocannonRecoilSpringBlock;
@@ -805,6 +806,14 @@ public class CBCBlocks {
 		.register();
 
 	//////// Cannon loading blocks ////////
+
+	public static final BlockEntry<CannonHopperBlock> CANNON_HOPPER = REGISTRATE
+		.block("cannon_hopper", CannonHopperBlock::new)
+		.properties(p -> p.mapColor(MapColor.PODZOL))
+		.properties(p -> p.sound(SoundType.ANVIL))
+		.transform(b -> b.tag(BlockTags.MINEABLE_WITH_PICKAXE))
+		.transform(CBCBuilderTransformers.cannonHopper())
+		.register();
 
 	public static final BlockEntry<CannonLoaderBlock> CANNON_LOADER = REGISTRATE
 		.block("cannon_loader", CannonLoaderBlock::new)

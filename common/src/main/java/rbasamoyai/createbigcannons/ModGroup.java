@@ -63,6 +63,7 @@ public class ModGroup {
 				CBCBlocks.BUILT_UP_NETHERSTEEL_CANNON_BARREL.asStack(),
 				CBCBlocks.NETHERSTEEL_CANNON_BARREL.asStack(),
 
+				CBCBlocks.CANNON_HOPPER.asStack(),
 				CBCBlocks.CANNON_LOADER.asStack(),
 				CBCBlocks.RAM_HEAD.asStack(),
 				CBCBlocks.WORM_HEAD.asStack(),

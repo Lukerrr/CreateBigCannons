@@ -5,8 +5,8 @@ import com.simibubi.create.foundation.data.SpecialBlockStateGen;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
-
 public abstract class CannonLoaderGen extends SpecialBlockStateGen {
+
 
 	@ExpectPlatform public static CannonLoaderGen create() { throw new AssertionError(); }
 
