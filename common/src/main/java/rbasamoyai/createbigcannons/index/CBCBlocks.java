@@ -809,7 +809,6 @@ public class CBCBlocks {
 
 	public static final BlockEntry<CannonHopperBlock> CANNON_HOPPER = REGISTRATE
 		.block("cannon_hopper", CannonHopperBlock::new)
-		.properties(p -> p.mapColor(MapColor.PODZOL))
 		.properties(p -> p.sound(SoundType.ANVIL))
 		.transform(b -> b.tag(BlockTags.MINEABLE_WITH_PICKAXE))
 		.transform(CBCBuilderTransformers.cannonHopper())

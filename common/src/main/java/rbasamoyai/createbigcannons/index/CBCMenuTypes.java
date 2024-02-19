@@ -4,6 +4,8 @@ import static rbasamoyai.createbigcannons.CreateBigCannons.REGISTRATE;
 
 import com.tterrag.registrate.util.entry.MenuEntry;
 
+import rbasamoyai.createbigcannons.cannonloading.cannonhopper.CannonHopperMenu;
+import rbasamoyai.createbigcannons.cannonloading.cannonhopper.CannonHopperScreen;
 import rbasamoyai.createbigcannons.munitions.autocannon.ammo_container.AutocannonAmmoContainerMenu;
 import rbasamoyai.createbigcannons.munitions.autocannon.ammo_container.AutocannonAmmoContainerScreen;
 import rbasamoyai.createbigcannons.munitions.fuzes.DelayedImpactFuzeContainer;
@@ -29,6 +31,10 @@ public class CBCMenuTypes {
 
 	public static final MenuEntry<AutocannonAmmoContainerMenu> AUTOCANNON_AMMO_CONTAINER = REGISTRATE
 		.menu("autocannon_ammo_container", AutocannonAmmoContainerMenu::getClientMenu, () -> AutocannonAmmoContainerScreen::new)
+		.register();
+
+	public static final MenuEntry<CannonHopperMenu> CANNON_HOPPER_CONTAINER = REGISTRATE
+		.menu("cannon_hopper_container", CannonHopperMenu::getClientMenu, () -> CannonHopperScreen::new)
 		.register();
 
 	public static void register() {

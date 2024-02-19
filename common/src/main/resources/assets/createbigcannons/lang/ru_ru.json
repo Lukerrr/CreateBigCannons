@@ -205,6 +205,7 @@
 "block.createbigcannons.wrought_iron_cannon_end": "Конец Кованной Пушки",
 "block.createbigcannons.yaw_controller": "Контроллер Поворота Пушки",
 "createbigcannons.gui.autocannon_ammo_container.tracer_spacing": "Промежуток между трассерами: каждые %s выстрел-(ов)",
+"createbigcannons.gui.cannon_hopper.powder_amount": "Количество пороха: %s",
 "createbigcannons.gui.set_proximity_fuze.distance": "Дистанция детонации: _%s_ блоков",
 "createbigcannons.gui.set_timed_fuze.time": "Время взрывателя: %ss %s тиков",
 "createbigcannons.ponder.cannon_crafting/basin_foundry.header": "Использование литейной крышки для плавки",
