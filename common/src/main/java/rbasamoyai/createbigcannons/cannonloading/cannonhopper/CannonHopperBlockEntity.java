@@ -20,9 +20,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import rbasamoyai.createbigcannons.index.CBCMenuTypes;
+import rbasamoyai.createbigcannons.munitions.AbstractCannonProjectile;
+import rbasamoyai.createbigcannons.munitions.big_cannon.FuzedBigCannonProjectile;
 import rbasamoyai.createbigcannons.munitions.big_cannon.ProjectileBlock;
 import rbasamoyai.createbigcannons.munitions.fuzes.FuzeItem;
 
@@ -75,6 +78,32 @@ public class CannonHopperBlockEntity extends KineticBlockEntity implements MenuP
 		};
 	}
 
+	public AbstractCannonProjectile getProjectile(Level level) {
+		if (isEmpty()) {
+			return null;
+		}
+
+		ItemStack projectileItem = removeItem(PROJECTILE_SLOT, 1);
+		AbstractCannonProjectile projectile = null;
+
+		if (projectileItem.getItem() instanceof BlockItem projectileBlockItem) {
+			if (projectileBlockItem.getBlock() instanceof ProjectileBlock projectileBlock) {
+				projectile = projectileBlock.getProjectile(level, getBlockState(), getBlockPos(), null);
+			}
+		}
+
+		if (projectile != null) {
+			if (projectile instanceof FuzedBigCannonProjectile fuzedProjectile) {
+				ItemStack fuzeItem = removeItem(FUZE_SLOT, 1);
+				if (!fuzeItem.isEmpty()) {
+					fuzedProjectile.setFuze(fuzeItem);
+				}
+			}
+		}
+
+		return projectile;
+	}
+
 	@Nonnull
 	private String getSlotName(int slot) {
 		return switch (slot) {
@@ -88,8 +117,7 @@ public class CannonHopperBlockEntity extends KineticBlockEntity implements MenuP
 
 	@Override
 	public boolean isEmpty() {
-		return this.getItem(FUZE_SLOT).isEmpty() &&
-			this.getItem(PROJECTILE_SLOT).isEmpty();
+		return this.getItem(PROJECTILE_SLOT).isEmpty();
 	}
 
 	@Override

@@ -32,6 +32,7 @@ import net.minecraft.world.phys.Vec3;
 import rbasamoyai.createbigcannons.CBCTags;
 import rbasamoyai.createbigcannons.cannon_control.ControlPitchContraption;
 import rbasamoyai.createbigcannons.cannon_control.effects.CannonPlumeParticleData;
+import rbasamoyai.createbigcannons.cannonloading.cannonhopper.CannonHopperBlockEntity;
 import rbasamoyai.createbigcannons.cannons.big_cannons.BigCannonBehavior;
 import rbasamoyai.createbigcannons.cannons.big_cannons.BigCannonBlock;
 import rbasamoyai.createbigcannons.cannons.big_cannons.IBigCannonBlockEntity;
@@ -52,6 +53,7 @@ import rbasamoyai.createbigcannons.munitions.big_cannon.propellant.BigCannonProp
 public class MountedBigCannonContraption extends AbstractMountedCannonContraption {
 
 	private BigCannonMaterial cannonMaterial;
+	private CannonHopperBlockEntity cannonHopper;
 	public boolean hasFired = false;
 	private int reloadTicksRemain = 0;
 
@@ -182,6 +184,7 @@ public class MountedBigCannonContraption extends AbstractMountedCannonContraptio
 			this.presentBlockEntities.put(localPos, be);
 		}
 		this.cannonMaterial = material;
+		this.cannonHopper = (CannonHopperBlockEntity)level.getBlockEntity(pos.below());
 
 		return true;
 	}
@@ -242,127 +245,146 @@ public class MountedBigCannonContraption extends AbstractMountedCannonContraptio
 		if (this.presentBlockEntities.get(endPos) instanceof QuickfiringBreechBlockEntity qfbreech && qfbreech.getOpenProgress() > 0)
 			return;
 
-		StructureBlockInfo foundProjectile = null;
-		float chargesUsed = 0;
-		float stress = 0;
-		float smokeScale = 0;
-		int barrelTravelled = 0;
-		RandomSource rand = level.getRandom();
-
-		boolean failed = false;
-		boolean canFail = !CBCConfigs.SERVER.failure.disableAllFailure.get();
+		AbstractCannonProjectile firedProjectile = null;
 		BlockPos currentPos = this.startPos.immutable();
-		int count = 0;
-		BlockEntity failedEntity = null;
-
+		float chargesUsed = 0;
+		float smokeScale = 0;
+	
 		float spread = 0.0f;
 		float spreadSub = CBCConfigs.SERVER.cannons.barrelSpreadReduction.getF();
 
-		boolean emptyNoProjectile = false;
-
-		BigCannonMaterialProperties properties = this.cannonMaterial.properties();
-
-		StructureBlockInfo breech = this.blocks.get(this.startPos.relative(this.initialOrientation.getOpposite()));
-		int materialStrength = properties.maxSafeBaseCharges();
-		int maxSafeCharges = Math.min(materialStrength, BigCannonBreechStrengthHandler.getStrength(breech.state().getBlock(), materialStrength));
-
-		BigCannonPropellantBlock propellant = null;
-
-		while (this.presentBlockEntities.get(currentPos) instanceof IBigCannonBlockEntity cbe) {
-			BigCannonBehavior behavior = cbe.cannonBehavior();
-			StructureBlockInfo containedBlockInfo = behavior.block();
-			StructureBlockInfo cannonInfo = this.blocks.get(currentPos);
-
-			if (foundProjectile == null && containedBlockInfo.state().isAir()) {
-				if (count == 0) return;
-				emptyNoProjectile = true;
-				chargesUsed = Math.max(chargesUsed - 1, 0);
-			} else if (containedBlockInfo.state().getBlock() instanceof BigCannonPropellantBlock cpropel) {
-				if (propellant == null) {
-					if (!cpropel.canBeIgnited(containedBlockInfo, this.initialOrientation)) return;
-					propellant = cpropel;
-				} else if (propellant.isCompatibleWith(cpropel, containedBlockInfo, this.initialOrientation)) {
-					propellant = cpropel;
-				} else if (canFail) {
-					failed = true;
-					failedEntity = behavior.blockEntity;
-					break;
-				}
-
-				this.consumeBlock(behavior, currentPos, propellant::consumePropellant);
-				float power = Math.max(0, propellant.getChargePower(containedBlockInfo));
-				chargesUsed += power;
-				smokeScale += power;
-				stress += propellant.getStressOnCannon(containedBlockInfo);
-				spread += propellant.getSpread(containedBlockInfo);
-
-				if (canFail && (!cbe.blockCanHandle(cannonInfo) && rollBarrelBurst(rand)
-					|| stress > maxSafeCharges && rollOverloadBurst(rand))) {
-					failed = true;
-					failedEntity = behavior.blockEntity;
-					break;
-				}
-				if (emptyNoProjectile && canFail && rollFailToIgnite(rand)) {
-					Vec3 failIgnitePos = entity.toGlobalVector(Vec3.atCenterOf(currentPos.relative(this.initialOrientation)), 1.0f);
-					level.playSound(null, failIgnitePos.x, failIgnitePos.y, failIgnitePos.z, cannonInfo.state().getSoundType().getBreakSound(), SoundSource.BLOCKS, 5.0f, 0.0f);
-					return;
-				}
-				emptyNoProjectile = false;
-			} else if (containedBlockInfo.state().getBlock() instanceof ProjectileBlock && foundProjectile == null) {
-				if (chargesUsed == 0) return;
-				foundProjectile = containedBlockInfo;
-				if (emptyNoProjectile && rollFailToIgnite(rand) && canFail) {
-					Vec3 failIgnitePos = entity.toGlobalVector(Vec3.atCenterOf(currentPos.relative(this.initialOrientation)), 1.0f);
-					level.playSound(null, failIgnitePos.x, failIgnitePos.y, failIgnitePos.z, cannonInfo.state().getSoundType().getBreakSound(), SoundSource.BLOCKS, 5.0f, 0.0f);
-					return;
-				}
-				this.consumeBlock(behavior, currentPos);
-				emptyNoProjectile = false;
-			} else if (!containedBlockInfo.state().isAir() && foundProjectile != null) {
-				if (canFail) {
-					failed = true;
-					failedEntity = behavior.blockEntity;
-					break;
-				} else {
+		if (cannonHopper == null) {
+			StructureBlockInfo foundProjectile = null;
+			float stress = 0;
+			int barrelTravelled = 0;
+			RandomSource rand = level.getRandom();
+	
+			boolean failed = false;
+			boolean canFail = !CBCConfigs.SERVER.failure.disableAllFailure.get();
+			int count = 0;
+			BlockEntity failedEntity = null;
+	
+			boolean emptyNoProjectile = false;
+	
+			BigCannonMaterialProperties properties = this.cannonMaterial.properties();
+	
+			StructureBlockInfo breech = this.blocks.get(this.startPos.relative(this.initialOrientation.getOpposite()));
+			int materialStrength = properties.maxSafeBaseCharges();
+			int maxSafeCharges = Math.min(materialStrength, BigCannonBreechStrengthHandler.getStrength(breech.state().getBlock(), materialStrength));
+	
+			BigCannonPropellantBlock propellant = null;
+	
+			while (this.presentBlockEntities.get(currentPos) instanceof IBigCannonBlockEntity cbe) {
+				BigCannonBehavior behavior = cbe.cannonBehavior();
+				StructureBlockInfo containedBlockInfo = behavior.block();
+				StructureBlockInfo cannonInfo = this.blocks.get(currentPos);
+	
+				if (foundProjectile == null && containedBlockInfo.state().isAir()) {
+					if (count == 0) return;
+					emptyNoProjectile = true;
+					chargesUsed = Math.max(chargesUsed - 1, 0);
+				} else if (containedBlockInfo.state().getBlock() instanceof BigCannonPropellantBlock cpropel) {
+					if (propellant == null) {
+						if (!cpropel.canBeIgnited(containedBlockInfo, this.initialOrientation)) return;
+						propellant = cpropel;
+					} else if (propellant.isCompatibleWith(cpropel, containedBlockInfo, this.initialOrientation)) {
+						propellant = cpropel;
+					} else if (canFail) {
+						failed = true;
+						failedEntity = behavior.blockEntity;
+						break;
+					}
+	
+					this.consumeBlock(behavior, currentPos, propellant::consumePropellant);
+					float power = Math.max(0, propellant.getChargePower(containedBlockInfo));
+					chargesUsed += power;
+					smokeScale += power;
+					stress += propellant.getStressOnCannon(containedBlockInfo);
+					spread += propellant.getSpread(containedBlockInfo);
+	
+					if (canFail && (!cbe.blockCanHandle(cannonInfo) && rollBarrelBurst(rand)
+						|| stress > maxSafeCharges && rollOverloadBurst(rand))) {
+						failed = true;
+						failedEntity = behavior.blockEntity;
+						break;
+					}
+					if (emptyNoProjectile && canFail && rollFailToIgnite(rand)) {
+						Vec3 failIgnitePos = entity.toGlobalVector(Vec3.atCenterOf(currentPos.relative(this.initialOrientation)), 1.0f);
+						level.playSound(null, failIgnitePos.x, failIgnitePos.y, failIgnitePos.z, cannonInfo.state().getSoundType().getBreakSound(), SoundSource.BLOCKS, 5.0f, 0.0f);
+						return;
+					}
+					emptyNoProjectile = false;
+				} else if (containedBlockInfo.state().getBlock() instanceof ProjectileBlock && foundProjectile == null) {
+					if (chargesUsed == 0) return;
+					foundProjectile = containedBlockInfo;
+					if (emptyNoProjectile && rollFailToIgnite(rand) && canFail) {
+						Vec3 failIgnitePos = entity.toGlobalVector(Vec3.atCenterOf(currentPos.relative(this.initialOrientation)), 1.0f);
+						level.playSound(null, failIgnitePos.x, failIgnitePos.y, failIgnitePos.z, cannonInfo.state().getSoundType().getBreakSound(), SoundSource.BLOCKS, 5.0f, 0.0f);
+						return;
+					}
 					this.consumeBlock(behavior, currentPos);
+					emptyNoProjectile = false;
+				} else if (!containedBlockInfo.state().isAir() && foundProjectile != null) {
+					if (canFail) {
+						failed = true;
+						failedEntity = behavior.blockEntity;
+						break;
+					} else {
+						this.consumeBlock(behavior, currentPos);
+					}
+				}
+	
+				currentPos = currentPos.relative(this.initialOrientation);
+	
+				BlockState cannonState = cannonInfo.state();
+				if (cannonState.getBlock() instanceof BigCannonBlock cannon && cannon.getOpeningType(level, cannonState, currentPos) == BigCannonEnd.OPEN) {
+					++count;
+				}
+	
+				if (foundProjectile != null) {
+					++barrelTravelled;
+					if (cannonInfo.state().is(CBCTags.CBCBlockTags.REDUCES_SPREAD)) {
+						spread = Math.max(spread - spreadSub, 0.0f);
+					}
+	
+					if (chargesUsed > 0 && (double) barrelTravelled / (double) chargesUsed > this.cannonMaterial.properties().squibRatio() && rollSquib(rand)) {
+						behavior.loadBlock(foundProjectile);
+						CompoundTag tag = behavior.blockEntity.saveWithFullMetadata();
+						tag.remove("x");
+						tag.remove("y");
+						tag.remove("z");
+						StructureBlockInfo squibInfo = new StructureBlockInfo(cannonInfo.pos(), cannonInfo.state(), tag);
+						this.blocks.put(cannonInfo.pos(), squibInfo);
+	
+						Vec3 squibPos = entity.toGlobalVector(Vec3.atCenterOf(currentPos.relative(this.initialOrientation)), 1.0f);
+						level.playSound(null, squibPos.x, squibPos.y, squibPos.z, cannonInfo.state().getSoundType().getBreakSound(), SoundSource.BLOCKS, 10.0f, 0.0f);
+						return;
+					}
 				}
 			}
-
-			currentPos = currentPos.relative(this.initialOrientation);
-
-			BlockState cannonState = cannonInfo.state();
-			if (cannonState.getBlock() instanceof BigCannonBlock cannon && cannon.getOpeningType(level, cannonState, currentPos) == BigCannonEnd.OPEN) {
-				++count;
+			if (canFail && failed && failedEntity != null) {
+				this.fail(currentPos, level, entity, failedEntity, (int) chargesUsed);
+				return;
 			}
 
-			if (foundProjectile != null) {
-				++barrelTravelled;
-				if (cannonInfo.state().is(CBCTags.CBCBlockTags.REDUCES_SPREAD)) {
-					spread = Math.max(spread - spreadSub, 0.0f);
-				}
-
-				if (chargesUsed > 0 && (double) barrelTravelled / (double) chargesUsed > this.cannonMaterial.properties().squibRatio() && rollSquib(rand)) {
-					behavior.loadBlock(foundProjectile);
-					CompoundTag tag = behavior.blockEntity.saveWithFullMetadata();
-					tag.remove("x");
-					tag.remove("y");
-					tag.remove("z");
-					StructureBlockInfo squibInfo = new StructureBlockInfo(cannonInfo.pos(), cannonInfo.state(), tag);
-					this.blocks.put(cannonInfo.pos(), squibInfo);
-
-					Vec3 squibPos = entity.toGlobalVector(Vec3.atCenterOf(currentPos.relative(this.initialOrientation)), 1.0f);
-					level.playSound(null, squibPos.x, squibPos.y, squibPos.z, cannonInfo.state().getSoundType().getBreakSound(), SoundSource.BLOCKS, 10.0f, 0.0f);
-					return;
-				}
+			if (chargesUsed <= 0) {
+				chargesUsed = 0.5f;
 			}
-		}
-		if (canFail && failed && failedEntity != null) {
-			this.fail(currentPos, level, entity, failedEntity, (int) chargesUsed);
-			return;
-		}
 
-		if (chargesUsed <= 0) {
-			chargesUsed = 0.5f;
+			if (foundProjectile != null && foundProjectile.state().getBlock() instanceof ProjectileBlock projectileBlock) {
+				BlockEntity projectileBE = foundProjectile.nbt() == null ? null : BlockEntity.loadStatic(foundProjectile.pos(), foundProjectile.state(), foundProjectile.nbt());
+				firedProjectile = projectileBlock.getProjectile(level, foundProjectile.state(), foundProjectile.pos(), projectileBE);
+			}
+
+		} else {
+			firedProjectile = cannonHopper.getProjectile(level);
+			chargesUsed = cannonHopper.getPowderAmount();
+			smokeScale = chargesUsed;
+			spread = 0.0f;
+
+			while (this.presentBlockEntities.get(currentPos) instanceof IBigCannonBlockEntity) {
+				currentPos = currentPos.relative(this.initialOrientation);
+			}
 		}
 
 		Vec3 spawnPos = entity.toGlobalVector(Vec3.atCenterOf(currentPos.relative(this.initialOrientation)), 1.0f);
@@ -370,15 +392,13 @@ public class MountedBigCannonContraption extends AbstractMountedCannonContraptio
 
 		float recoilMagnitude = chargesUsed;
 
-		if (foundProjectile != null && foundProjectile.state().getBlock() instanceof ProjectileBlock projectileBlock) {
-			BlockEntity projectileBE = foundProjectile.nbt() == null ? null : BlockEntity.loadStatic(foundProjectile.pos(), foundProjectile.state(), foundProjectile.nbt());
-			AbstractCannonProjectile projectile = projectileBlock.getProjectile(level, foundProjectile.state(), foundProjectile.pos(), projectileBE);
-			projectile.setPos(spawnPos);
-			projectile.setChargePower(chargesUsed);
-			projectile.shoot(vec.x, vec.y, vec.z, chargesUsed, spread);
-			projectile.xRotO = projectile.getXRot();
-			projectile.yRotO = projectile.getYRot();
-			level.addFreshEntity(projectile);
+		if (firedProjectile != null) {
+			firedProjectile.setPos(spawnPos);
+			firedProjectile.setChargePower(chargesUsed);
+			firedProjectile.shoot(vec.x, vec.y, vec.z, chargesUsed, spread);
+			firedProjectile.xRotO = firedProjectile.getXRot();
+			firedProjectile.yRotO = firedProjectile.getYRot();
+			level.addFreshEntity(firedProjectile);
 			recoilMagnitude += 1;
 		}
 
@@ -399,8 +419,7 @@ public class MountedBigCannonContraption extends AbstractMountedCannonContraptio
 	}
 
 	private void consumeBlock(BigCannonBehavior behavior, BlockPos pos, Consumer<BigCannonBehavior> action) {
-		// Do not consume
-		/*action.accept(behavior);
+		action.accept(behavior);
 		CompoundTag tag = behavior.blockEntity.saveWithFullMetadata();
 		tag.remove("x");
 		tag.remove("y");
@@ -409,7 +428,7 @@ public class MountedBigCannonContraption extends AbstractMountedCannonContraptio
 		StructureBlockInfo oldInfo = this.blocks.get(pos);
 		if (oldInfo == null) return;
 		StructureBlockInfo consumedInfo = new StructureBlockInfo(oldInfo.pos(), oldInfo.state(), tag);
-		this.blocks.put(oldInfo.pos(), consumedInfo);*/
+		this.blocks.put(oldInfo.pos(), consumedInfo);
 	}
 
 	private static boolean rollSquib(RandomSource random) {
@@ -469,6 +488,9 @@ public class MountedBigCannonContraption extends AbstractMountedCannonContraptio
 	public CompoundTag writeNBT(boolean clientData) {
 		CompoundTag tag = super.writeNBT(clientData);
 		tag.putString("CannonMaterial", this.cannonMaterial == null ? CBCBigCannonMaterials.CAST_IRON.name().toString() : this.cannonMaterial.name().toString());
+		if (this.cannonHopper != null) {
+			tag.putLong("CannonHopper", this.cannonHopper.getBlockPos().asLong());
+		}
 		return tag;
 	}
 
@@ -477,6 +499,9 @@ public class MountedBigCannonContraption extends AbstractMountedCannonContraptio
 		super.readNBT(level, tag, clientData);
 		this.cannonMaterial = BigCannonMaterial.fromNameOrNull(new ResourceLocation(tag.getString("CannonMaterial")));
 		if (this.cannonMaterial == null) this.cannonMaterial = CBCBigCannonMaterials.CAST_IRON;
+		if (tag.contains("CannonHopper")) {
+			this.cannonHopper = (CannonHopperBlockEntity)level.getBlockEntity(BlockPos.of(tag.getLong("CannonHopper")));
+		}
 	}
 
 	@Override
