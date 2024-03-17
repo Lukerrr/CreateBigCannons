@@ -10,6 +10,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import com.google.gson.JsonObject;
+import com.simibubi.create.AllSoundEvents.SoundEntry;
+import com.simibubi.create.AllSoundEvents.SoundEntryBuilder;
 
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
@@ -39,7 +41,19 @@ public class CBCSoundEvents {
 		PLACE_AUTOCANNON_AMMO_CONTAINER = create("place_autocannon_ammo_container").noSubtitle()
 				.playExisting(SoundEvents.ARMOR_EQUIP_IRON, 0.25f, 1.0f)
 				.category(SoundSource.BLOCKS)
-				.build();
+				.build(),
+
+		INCOMING_SHELL = create("incoming_shell").noSubtitle()
+			.addVariant("incoming_shell_01")
+			.addVariant("incoming_shell_02")
+			.addVariant("incoming_shell_03")
+			.addVariant("incoming_shell_04")
+			.addVariant("incoming_shell_05")
+			.addVariant("incoming_shell_06")
+			.addVariant("incoming_shell_07")
+			.addVariant("incoming_shell_08")
+			.category(SoundSource.BLOCKS)
+			.build();
 
 	private static SoundEntryBuilder create(String id) {
 		return new CBCSoundEntryBuilder(CreateBigCannons.resource(id));

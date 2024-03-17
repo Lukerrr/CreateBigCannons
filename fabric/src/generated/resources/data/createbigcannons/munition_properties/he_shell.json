@@ -3,7 +3,7 @@
   "drag": 0.99,
   "durability_mass": 8.0,
   "entity_damage": 120.0,
-  "explosive_power": 24.0,
+  "explosive_power": 10.0,
   "gravity": -0.05,
   "ignores_entity_armor": true,
   "renders_invulnerable": false

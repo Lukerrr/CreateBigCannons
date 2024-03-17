@@ -40,5 +40,41 @@
         "name": "minecraft:item.armor.equip_iron"
       }
     ]
+  },
+  "incoming_shell": {
+    "sounds": [
+      {
+        "type": "file",
+        "name": "createbigcannons:incoming_shell_01"
+      },
+      {
+        "type": "file",
+        "name": "createbigcannons:incoming_shell_02"
+      },
+      {
+        "type": "file",
+        "name": "createbigcannons:incoming_shell_03"
+      },
+      {
+        "type": "file",
+        "name": "createbigcannons:incoming_shell_04"
+      },
+      {
+        "type": "file",
+        "name": "createbigcannons:incoming_shell_05"
+      },
+      {
+        "type": "file",
+        "name": "createbigcannons:incoming_shell_06"
+      },
+      {
+        "type": "file",
+        "name": "createbigcannons:incoming_shell_07"
+      },
+      {
+        "type": "file",
+        "name": "createbigcannons:incoming_shell_08"
+      }
+    ]
   }
 }
