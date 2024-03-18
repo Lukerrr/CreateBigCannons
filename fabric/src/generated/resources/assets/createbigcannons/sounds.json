@@ -11,8 +11,20 @@
   "fire_big_cannon": {
     "sounds": [
       {
-        "type": "event",
-        "name": "minecraft:entity.generic.explode"
+        "type": "file",
+        "name": "createbigcannons:bigcannon_fire_01"
+      },
+      {
+        "type": "file",
+        "name": "createbigcannons:bigcannon_fire_02"
+      },
+      {
+        "type": "file",
+        "name": "createbigcannons:bigcannon_fire_03"
+      },
+      {
+        "type": "file",
+        "name": "createbigcannons:bigcannon_fire_04"
       }
     ],
     "subtitle": "createbigcannons.subtitle.fire_big_cannon"

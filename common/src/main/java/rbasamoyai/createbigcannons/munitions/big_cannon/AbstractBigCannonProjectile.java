@@ -23,6 +23,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import rbasamoyai.createbigcannons.CreateBigCannons;
 import rbasamoyai.createbigcannons.config.CBCConfigs;
 import rbasamoyai.createbigcannons.index.CBCDamageTypes;
 import rbasamoyai.createbigcannons.index.CBCSoundEvents;
@@ -50,13 +51,18 @@ public abstract class AbstractBigCannonProjectile extends AbstractCannonProjecti
 	private void targetProximityCheck() {
 		Vec3 curPos = this.position();
 		Vec3 curVel = this.getDeltaMovement();
+
+		if (curVel.length() < 3.f) {
+			return;
+		}
+
 		BlockState targetBlock = Blocks.AIR.defaultBlockState();
 
-		final double minImpactSecondsDelay = 1.4f;
-		final double maxImpactSecondsDelay = 1.6f;
+		final int incomeSoundTicks = CBCConfigs.SERVER.cannons.bigCannonShellIncomeSoundTicks.get();
+		final int minIncomeTicks = CBCConfigs.SERVER.cannons.bigCannonShellIncomeTicksMin.get();
+		final int maxIncomeTicks = CBCConfigs.SERVER.cannons.bigCannonShellIncomeTicksMax.get();
 
-		final double maxTicksCheck = maxImpactSecondsDelay * 20.0;
-		final double maxDistCheck = this.getDeltaMovement().length() * maxTicksCheck;
+		final double maxDistCheck = this.getDeltaMovement().length() * maxIncomeTicks;
 
 		float traveledDist = 0.f;
 		int traveledTicks = 0;
@@ -78,16 +84,29 @@ public abstract class AbstractBigCannonProjectile extends AbstractCannonProjecti
 		}
 
 		if (!targetBlock.isAir()) {
-			final float secondsToImpact = (float)traveledTicks / 20.f;
-			if (secondsToImpact >= minImpactSecondsDelay && secondsToImpact <= maxImpactSecondsDelay) {
+			if (traveledTicks >= minIncomeTicks && traveledTicks <= maxIncomeTicks) {
 				BlockPos targetBlockPos = BlockPos.containing(curPos);
 				if (!blocksWherePlayedSound.contains(targetBlockPos)) {
 					blocksWherePlayedSound.add(targetBlockPos);
-					Vec3 vecToTarget = curPos.subtract(this.position());
-					double distToTargetFlat = vecToTarget.length();
-					double offset = distToTargetFlat * 0.7;
-					BlockPos soundPos = BlockPos.containing(this.position().add(vecToTarget.normalize().multiply(new Vec3(offset, offset, offset))));
-					CBCSoundEvents.INCOMING_SHELL.playOnServer(this.level(), soundPos);
+					Vec3 vecFromTarget = this.position().subtract(curPos);
+					double distFromTargetFlat = vecFromTarget.length();
+					final double maxOffset =  CBCConfigs.SERVER.cannons.bigCannonShellIncomeMaxSoundOffset.get();
+					double offset = distFromTargetFlat * 0.3;
+					if (offset > maxOffset) {
+						offset = maxOffset;
+					}
+					BlockPos soundPos = BlockPos.containing(curPos.add(vecFromTarget.normalize().multiply(new Vec3(offset, offset, offset))));
+
+					float soundPitch = (float)incomeSoundTicks / (float)traveledTicks;
+					CBCSoundEvents.INCOMING_SHELL.playOnServer(
+						this.level(),
+						soundPos,
+						CBCConfigs.SERVER.cannons.bigCannonShellIncomeSoundVolume.getF(),
+						soundPitch);
+
+					CreateBigCannons.LOGGER.info(String.format(
+						"Spawned sound, ticks remain: %d, velocity: %f, pitch: %f",
+						traveledTicks, this.getDeltaMovement().length(), soundPitch));
 				}
 			}
 		}

@@ -27,9 +27,10 @@ public class CBCSoundEvents {
 
 	public static final SoundEntry
 		FIRE_BIG_CANNON = create("fire_big_cannon").subtitle("Big cannon fires")
-		.playExisting(SoundEvents.GENERIC_EXPLODE, 20.0f, 0.0f)
-		.playExisting(SoundEvents.GENERIC_EXPLODE, 20.0f, 0.02f)
-		.playExisting(SoundEvents.GENERIC_EXPLODE, 20.0f, 0.04f)
+		.addVariant("bigcannon_fire_01")
+		.addVariant("bigcannon_fire_02")
+		.addVariant("bigcannon_fire_03")
+		.addVariant("bigcannon_fire_04")
 		.category(SoundSource.BLOCKS)
 		.build(),
 
