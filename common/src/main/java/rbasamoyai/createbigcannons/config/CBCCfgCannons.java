@@ -12,12 +12,9 @@ public class CBCCfgCannons extends ConfigBase {
 	public final ConfigFloat autocannonRecoilScale = f(0.5f, 0, "autocannonRecoilScale");
 	public final ConfigInt bigCannonReloadSeconds = i(2, 0, "bigCannonReloadSeconds");
 
-	public final ConfigFloat bigCannonFireSoundVolume = f(25, 0, "bigCannonFireSoundVolume");
-	public final ConfigFloat bigCannonShellIncomeSoundVolume = f(3, 0, "bigCannonShellIncomeSoundVolume");
-	public final ConfigInt bigCannonShellIncomeSoundTicks = i(10, 1, "bigCannonShellIncomeSoundTicks");
-	public final ConfigInt bigCannonShellIncomeTicksMin = i(1, 1, "bigCannonShellIncomeTicksMin");
-	public final ConfigInt bigCannonShellIncomeTicksMax = i(15, 1, "bigCannonShellIncomeTicksMax");
-	public final ConfigFloat bigCannonShellIncomeMaxSoundOffset = f(10, 0, "bigCannonShellIncomeMaxSoundOffset");
+	public final ConfigFloat bigCannonFireSoundVolume = f(15, 0, "bigCannonFireSoundVolume");
+	public final ConfigFloat bigCannonFireSoundPitchMin = f(0.75f, 0, "bigCannonFireSoundPitchMin");
+	public final ConfigFloat bigCannonFireSoundPitchMax = f(1.25f, 0, "bigCannonFireSoundPitchMax");
 
 	public final ConfigGroup loadingTools = group(0, "loadingTools", "Loading Tools");
 	public final ConfigBool deployersCanUseLoadingTools = b(false, "deployersCanUseLoadingTools", Comments.deployersCanUseLoadingTools);

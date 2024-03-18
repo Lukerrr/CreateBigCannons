@@ -15,6 +15,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -33,7 +34,7 @@ import rbasamoyai.createbigcannons.munitions.config.BlockHardnessHandler;
 
 public abstract class AbstractBigCannonProjectile extends AbstractCannonProjectile {
 
-	private HashSet<BlockPos> blocksWherePlayedSound = new HashSet<BlockPos>();
+	private boolean playedIncomeSoundForLocalPlayer = false;
 
 	protected AbstractBigCannonProjectile(EntityType<? extends AbstractBigCannonProjectile> type, Level level) {
 		super(type, level);
@@ -43,7 +44,7 @@ public abstract class AbstractBigCannonProjectile extends AbstractCannonProjecti
 	public void tick() {
 		super.tick();
 
-		if (!this.level().isClientSide && !this.isInGround()) {
+		if (this.level().isClientSide && !this.isInGround()) {
 			targetProximityCheck();
 		}
 	}
@@ -56,13 +57,27 @@ public abstract class AbstractBigCannonProjectile extends AbstractCannonProjecti
 			return;
 		}
 
-		BlockState targetBlock = Blocks.AIR.defaultBlockState();
+		Player localPlayer = null;
+		for (Player worldPlayer : this.level().players()) {
+			if (worldPlayer.isLocalPlayer()) {
+				localPlayer = worldPlayer;
+				break;
+			}
+		}
 
-		final int incomeSoundTicks = CBCConfigs.SERVER.cannons.bigCannonShellIncomeSoundTicks.get();
-		final int minIncomeTicks = CBCConfigs.SERVER.cannons.bigCannonShellIncomeTicksMin.get();
-		final int maxIncomeTicks = CBCConfigs.SERVER.cannons.bigCannonShellIncomeTicksMax.get();
+		if (localPlayer == null) {
+			return;
+		}
+
+		final int incomeSoundTicks = CBCConfigs.CLIENT.bigCannonShellIncomeSoundTicks.get();
+		final int minIncomeTicks = CBCConfigs.CLIENT.bigCannonShellIncomeTicksMin.get();
+		final int maxIncomeTicks = CBCConfigs.CLIENT.bigCannonShellIncomeTicksMax.get();
 
 		final double maxDistCheck = this.getDeltaMovement().length() * maxIncomeTicks;
+
+		double distanceToPlayerHead = -1;
+		boolean movingTowardPlayer = false;
+		boolean movingAcrossPlayer = false;
 
 		float traveledDist = 0.f;
 		int traveledTicks = 0;
@@ -77,37 +92,46 @@ public abstract class AbstractBigCannonProjectile extends AbstractCannonProjecti
 			curPos = newPos;
 			curVel = vel;
 
-			targetBlock = this.level().getBlockState(BlockPos.containing(curPos));
-			if (!targetBlock.isAir()) {
-				break;
+			double curDistanceToPlayerHead = localPlayer.getEyePosition().subtract(curPos).length();
+			if (distanceToPlayerHead < 0) {
+				distanceToPlayerHead = curDistanceToPlayerHead;
+			} else {
+				if (distanceToPlayerHead > curDistanceToPlayerHead) {
+					movingTowardPlayer = true;
+					distanceToPlayerHead = curDistanceToPlayerHead;
+				}
+				else
+				{
+					if (movingTowardPlayer) {
+						movingAcrossPlayer = true;
+						break;
+					}
+				}
 			}
 		}
 
-		if (!targetBlock.isAir()) {
-			if (traveledTicks >= minIncomeTicks && traveledTicks <= maxIncomeTicks) {
-				BlockPos targetBlockPos = BlockPos.containing(curPos);
-				if (!blocksWherePlayedSound.contains(targetBlockPos)) {
-					blocksWherePlayedSound.add(targetBlockPos);
-					Vec3 vecFromTarget = this.position().subtract(curPos);
-					double distFromTargetFlat = vecFromTarget.length();
-					final double maxOffset =  CBCConfigs.SERVER.cannons.bigCannonShellIncomeMaxSoundOffset.get();
-					double offset = distFromTargetFlat * 0.3;
-					if (offset > maxOffset) {
-						offset = maxOffset;
-					}
-					BlockPos soundPos = BlockPos.containing(curPos.add(vecFromTarget.normalize().multiply(new Vec3(offset, offset, offset))));
-
-					float soundPitch = (float)incomeSoundTicks / (float)traveledTicks;
-					CBCSoundEvents.INCOMING_SHELL.playOnServer(
-						this.level(),
-						soundPos,
-						CBCConfigs.SERVER.cannons.bigCannonShellIncomeSoundVolume.getF(),
-						soundPitch);
-
-					CreateBigCannons.LOGGER.info(String.format(
-						"Spawned sound, ticks remain: %d, velocity: %f, pitch: %f",
-						traveledTicks, this.getDeltaMovement().length(), soundPitch));
+		if (movingAcrossPlayer && traveledTicks >= minIncomeTicks && traveledTicks <= maxIncomeTicks) {
+			if (!playedIncomeSoundForLocalPlayer) {
+				playedIncomeSoundForLocalPlayer = true;
+				Vec3 vecFromTarget = this.position().subtract(curPos);
+				double distFromTargetFlat = vecFromTarget.length();
+				final double maxOffset =  CBCConfigs.CLIENT.bigCannonShellIncomeMaxSoundOffset.get();
+				double offset = distFromTargetFlat * 0.3;
+				if (offset > maxOffset) {
+					offset = maxOffset;
 				}
+				Vec3 soundPos = curPos.add(vecFromTarget.normalize().multiply(new Vec3(offset, offset, offset)));
+				float soundPitch = (float)incomeSoundTicks / (float)traveledTicks;
+				CBCSoundEvents.INCOMING_SHELL.playAt(
+					this.level(),
+					soundPos,
+					CBCConfigs.CLIENT.bigCannonShellIncomeSoundVolume.getF(),
+					soundPitch,
+					false);
+
+				CreateBigCannons.LOGGER.info(String.format(
+					"Spawned sound, ticks remain: %d, velocity: %f, pitch: %f",
+					traveledTicks, this.getDeltaMovement().length(), soundPitch));
 			}
 		}
 	}

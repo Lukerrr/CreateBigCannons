@@ -9,6 +9,12 @@ public class CBCCfgClient extends CBCConfigBase {
 	public final ConfigEnum<PlumeSetting> showCannonPlumes = e(PlumeSetting.DEFAULT, "showCannonPlumes", Comments.showCannonPlumes);
 	public final ConfigFloat plumesScale = f(1, 0, 1, "plumesScale", Comments.plumesScale);
 	public final ConfigInt fluidBlobParticleCount = i(20, 0, 1000, "fluidBlobParticleCount", Comments.fluidBlobParticleCount);
+
+	public final ConfigFloat bigCannonShellIncomeSoundVolume = f(2, 0, "bigCannonShellIncomeSoundVolume");
+	public final ConfigInt bigCannonShellIncomeSoundTicks = i(10, 1, "bigCannonShellIncomeSoundTicks");
+	public final ConfigInt bigCannonShellIncomeTicksMin = i(1, 1, "bigCannonShellIncomeTicksMin");
+	public final ConfigInt bigCannonShellIncomeTicksMax = i(15, 1, "bigCannonShellIncomeTicksMax");
+	public final ConfigFloat bigCannonShellIncomeMaxSoundOffset = f(10, 0, "bigCannonShellIncomeMaxSoundOffset");
 	
 	@Override public String getName() { return "client"; }
 

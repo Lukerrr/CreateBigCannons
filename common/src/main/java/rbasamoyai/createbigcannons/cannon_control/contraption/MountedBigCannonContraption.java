@@ -411,7 +411,14 @@ public class MountedBigCannonContraption extends AbstractMountedCannonContraptio
 		for (ServerPlayer player : level.players()) {
 			level.sendParticles(player, new CannonPlumeParticleData(smokeScale * 0.5f), true, spawnPos.x, spawnPos.y, spawnPos.z, 0, vec.x, vec.y, vec.z, 1.0f);
 		}
-		CBCSoundEvents.FIRE_BIG_CANNON.playOnServer(level, BlockPos.containing(spawnPos), CBCConfigs.SERVER.cannons.bigCannonFireSoundVolume.getF(), 1.f);
+
+		final double minPitch = CBCConfigs.SERVER.cannons.bigCannonFireSoundPitchMin.get();
+		final double maxPitch = CBCConfigs.SERVER.cannons.bigCannonFireSoundPitchMax.get();
+		CBCSoundEvents.FIRE_BIG_CANNON.playOnServer(
+			level,
+			BlockPos.containing(spawnPos),
+			CBCConfigs.SERVER.cannons.bigCannonFireSoundVolume.getF(),
+			(float)(minPitch + Math.random() * (maxPitch - minPitch)));
 	}
 
 	private void consumeBlock(BigCannonBehavior behavior, BlockPos pos) {
