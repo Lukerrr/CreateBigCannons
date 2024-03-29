@@ -2,7 +2,12 @@ package rbasamoyai.createbigcannons.config;
 
 import com.simibubi.create.foundation.config.ConfigBase;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level.ExplosionInteraction;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class CBCCfgMunitions extends ConfigBase {
 
@@ -113,6 +118,13 @@ public class CBCCfgMunitions extends ConfigBase {
 		}
 
 		public ExplosionInteraction explosiveInteraction() { return this.explosiveInteraction; }
+	}
+
+	public static class ExpDamageCalcKeepBlocks extends ExplosionDamageCalculator {
+		@Override
+		public boolean shouldBlockExplode(Explosion explosion, BlockGetter reader, BlockPos pos, BlockState state, float power) {
+			return false;
+		}
 	}
 
 }

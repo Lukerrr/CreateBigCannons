@@ -26,7 +26,7 @@ import java.util.concurrent.Executor;
 public class MunitionPropertiesHandler {
 
     public static Map<EntityType<?>, MunitionProperties> PROJECTILES = new HashMap<>();
-    private static final MunitionProperties DEFAULT = new MunitionProperties(0, 0, 0,
+    private static final MunitionProperties DEFAULT = new MunitionProperties(0, 0, 1, 0,
 		true, false, false, -0.05, 0.99, null);
 
     public static class ReloadListener extends SimpleJsonResourceReloadListener {

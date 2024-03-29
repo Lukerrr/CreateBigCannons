@@ -70,6 +70,7 @@ public class MunitionPropertiesProvider extends CBCDataProvider {
 		private final EntityType<?> type;
 		private double entityDamage;
 		private double explosivePower = 0;
+		private double explosiveDamageMult = 1;
 		private double durabilityMass;
 		private boolean renderInvulnerable = false;
 		private boolean ignoresEntityArmor = true;
@@ -87,6 +88,7 @@ public class MunitionPropertiesProvider extends CBCDataProvider {
 
 		public Builder entityDamage(double value) { this.entityDamage = value; return this; }
 		public Builder explosivePower(double value) { this.explosivePower = value; return this; }
+		public Builder explosiveDamageMult(double value) { this.explosiveDamageMult = value; return this; }
 		public Builder durabilityMass(double value) { this.durabilityMass = value; return this; }
 		public Builder renderInvulnerable() { this.renderInvulnerable = true; return this; }
 		public Builder accountForEntityArmor() { this.ignoresEntityArmor = false; return this; }
@@ -103,7 +105,7 @@ public class MunitionPropertiesProvider extends CBCDataProvider {
 		}
 
 		public void build(MunitionPropertiesProvider cons) {
-			cons.projectiles.put(this.type, new MunitionProperties(this.entityDamage, this.explosivePower, this.durabilityMass,
+			cons.projectiles.put(this.type, new MunitionProperties(this.entityDamage, this.explosivePower, this.explosiveDamageMult, this.durabilityMass,
 				this.renderInvulnerable, this.ignoresEntityArmor, this.baseFuze, this.gravity, this.drag, this.buildShrapnel ?
 				new ShrapnelProperties(this.shrapnelDamage, this.shrapnelSpread, this.shrapnelCount) : null));
 		}

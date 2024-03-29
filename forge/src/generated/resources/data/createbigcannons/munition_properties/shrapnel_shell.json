@@ -2,13 +2,13 @@
   "base_fuze": false,
   "drag": 0.99,
   "durability_mass": 8.0,
-  "entity_damage": 130.0,
+  "entity_damage": 80.0,
   "gravity": -0.05,
-  "ignores_entity_armor": true,
+  "ignores_entity_armor": false,
   "renders_invulnerable": false,
   "shrapnel_properties": {
     "count": 150,
-    "entity_damage": 25.0,
+    "entity_damage": 20.0,
     "spread": 0.25
   }
 }
